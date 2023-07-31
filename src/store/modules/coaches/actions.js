@@ -28,7 +28,11 @@ export default {
       id: userId
     })
   },
-  async loadCoaches(context) {
+  async loadCoaches(context, payload) {
+    if (!payload.forceRefresh && !context.getters.shouldUpdate) {
+      return
+    }
+
     const response = await fetch(
       `https://vue-http-demo-8ad6c-default-rtdb.firebaseio.com/coaches.json`
     )
@@ -37,6 +41,7 @@ export default {
 
     if (!response.ok) {
       const error = new Error(responseData.message || 'Failed to fetch!')
+      throw error
     }
 
     const coaches = []
@@ -55,5 +60,6 @@ export default {
     }
 
     context.commit('setCoaches', coaches)
+    context.commit('setFetchTimestamp')
   }
 }
